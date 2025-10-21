@@ -1,127 +1,149 @@
-# CodeRSA: Pragmatic Reranking for LLM Code Generation
+# CodeRSA: Pragmatic Re-ranking for LLM Code Generation
 
-This repository hosts the *artifact package* for the paper **"Pragmatic Reasoning improves LLM Code Generation"**.
-It is designed for reviewers to verify the **authenticity and integrity of the provided data files** and to inspect a clean, minimal implementation layout of the re-ranking pipeline (CodeRSA).
+This repository provides the **reproducibility and data verification package** for the paper  
+**“Pragmatic Reasoning Improves LLM Code Generation.”**
 
-> **Goal of this repo**: make data verification and inspection easy. Full re-runs are optional and left to interested reviewers to perform with their own compute.
+It is designed to allow reviewers and researchers to:
+- Verify the authenticity and integrity of released data files.
+- Explore a clean, minimal implementation layout of the *CodeRSA* re-ranking pipeline.
+- Optionally reproduce the reported results with their own compute and model checkpoints.
 
-## What you can do here
-- ✅ Verify that every data file shipped by us is **complete, unmodified, and valid** (checksum + optional schema checks).
-- ✅ Explore a **minimal, readable project layout** for CodeRSA (interfaces & stubs are included; drop-in your code later).
-- ✅ (Optional) Reproduce results by plugging in your compute and models; we provide orchestration hooks but do not force full runs.
+---
 
-## Repository Layout
+## 🧩 Repository Overview
+
 ```
 .
 ├── README.md
 ├── CITATION.cff
 ├── LICENSE
 ├── Makefile
-├── .gitignore
 ├── env/
 │   ├── requirements.txt
 │   └── environment.yml
 ├── data/
-│   ├── MANIFEST.json            # authoritative list of data files + SHA256
-│   └── schema/                  # optional JSON/YAML schemas for validation
+│   ├── rsa_mbpp_llama3_8b.json      # Main dataset: MBPP + Llama-3 8B Instruct
+│   ├── MANIFEST.json                # SHA256 checksum manifest
+│   └── schema/                      # Optional JSON/YAML schemas for validation
 ├── scripts/
-│   ├── compute_checksums.py     # produce/refresh SHA256 in MANIFEST.json
-│   ├── verify_data.py           # verify data integrity & basic sanity checks
-│   └── validate_schema.py       # optional schema-based validation
+│   ├── compute_checksums.py         # Generate/update MANIFEST.json
+│   ├── verify_data.py               # Verify integrity and completeness
+│   ├── verify_rsa_with_tokens.py    # Validate core RSA-with-tokens logic
+│   └── validate_schema.py           # Optional schema validation
 ├── src/
 │   └── codersa/
 │       ├── __init__.py
-│       ├── sampling.py          # candidate sampling interfaces
-│       ├── rsa.py               # L0, S1, L1 definitions (interfaces)
-│       ├── clustering.py        # paraphrase-equivalence clustering hooks
-│       └── reranking.py         # glue: compute scores, rank candidates
+│       ├── sampling.py
+│       ├── rsa_core.py
+│       ├── clustering.py
+│       └── reranking.py
 └── tests/
-    └── test_data_manifest.py    # quick integrity test for the manifest
+    └── test_manifest_integrity.py
 ```
-## Quick Start
-```bash
-# 1) Create and activate env (choose one)
-python -m venv .venv && source .venv/bin/activate && pip install -r env/requirements.txt
-# or
-conda env create -f env/environment.yml && conda activate codersa
-
-# 2) Verify any data you place into ./data
-python scripts/compute_checksums.py    # populates/updates data/MANIFEST.json
-python scripts/verify_data.py          # verifies checksums & light sanity checks
-
-# 3) (Optional) run tests
-pytest -q
-```
-
-## Data authenticity & validity
-- **Integrity**: `scripts/verify_data.py` re-hashes each file and compares against `data/MANIFEST.json` (SHA256).
-- **Completeness**: `MANIFEST.json` is treated as the source of truth. Anything missing or unexpected is reported.
-- **Validity (optional)**: if schemas are present in `data/schema/`, `scripts/validate_schema.py` can run structural checks.
-
-## How to add your data (authors)
-1. Place your released files under `data/` (or nested subdirs).
-2. Run `python scripts/compute_checksums.py` to create/update `MANIFEST.json` with file sizes and SHA256 digests.
-3. Commit `MANIFEST.json` alongside your data so reviewers can verify byte-for-byte fidelity.
-
-## Reproduction policy (minimal by default)
-We provide clean interfaces under `src/codersa/` for *CodeRSA* components:
-- **Literal Listener (L0)**, **Pragmatic Speaker (S1)** with candidate-specific temperatures, and **Pragmatic Listener (L1)**.
-- **Paraphrase clustering** with an LLM-based equivalence oracle and cluster-level scoring.
-- **Reranking driver** to combine scores and select the best candidate.
-
-The default package ships with **interfaces + reference stubs**. You can drop your own implementation to reproduce results.
-We intentionally avoid large heavy checkpoints and lengthy jobs in CI for reviewer convenience.
-
-## Artifact badges (local checks)
-- Integrity: `make verify-data` → **PASS/FAIL** summary.
-- Manifest consistency: `make checksum` then re-run `make verify-data`.
-
-## Contact
-Open an issue or PR on the GitHub repository once you push this package.
 
 ---
 
-## Featured dataset: `rsa_with_tokens`
+## ⚙️ Environment Setup
 
-本仓库随附关键验证数据：`data/rsa_with_tokenprior_sum.json`。  
-我们提供**可复现的选择逻辑验证器**（与论文实现一致的推选逻辑：以 Topic_RSA 的 softmax[0] 作为分数，并用标准分数化 Prior 设定温度 `τ=exp(-A·z)`，A=1）。
+You can use either `venv` or `conda`:
 
-### 运行数据真实性与有效性校验
 ```bash
-# 生成/刷新清单（会计算 SHA256 与大小）
-python scripts/compute_checksums.py
+# Option 1: virtual environment
+python -m venv .venv
+source .venv/bin/activate
+pip install -r env/requirements.txt
 
-# 校验 data/ 与 MANIFEST.json 完整一致
+# Option 2: conda environment
+conda env create -f env/environment.yml
+conda activate codersa
+```
+
+---
+
+## 🧾 Data Authenticity and Validation
+
+All released data files are tracked through `data/MANIFEST.json`, which contains SHA256 checksums and file sizes.
+
+**Integrity check:**
+```bash
 python scripts/verify_data.py
+```
 
-# 运行 rsa-with-tokens 验证逻辑（输出 strict/mean accuracy）
-python scripts/verify_rsa_with_tokens.py --file data/rsa_with_tokenprior_sum.json
+**Manifest regeneration (if you modify data):**
+```bash
+python scripts/compute_checksums.py
 ```
-输出形如：
-```json
-{"strict_accuracy": 0.51, "mean_accuracy": 0.67, "total": 257}
+
+A successful validation will output:
 ```
-> 注：`strict_accuracy` 计算为最佳候选是否满分（accuracy==100.0）的比例；`mean_accuracy` 为最佳候选的平均分（/100）。
+All files match manifest. ✅ Integrity PASS
+```
 
 ---
 
-## Featured dataset: CodeRSA on MBPP (Llama-3 8B Instruct)
+## 📊 Featured Dataset: CodeRSA on MBPP (Llama-3 8B Instruct)
 
 **File:** `data/rsa_mbpp_llama3_8b.json`
 
-This dataset contains pragmatic re-ranking outputs computed from the **MBPP** benchmark using **Meta Llama-3 8B Instruct**.
+This dataset contains pragmatic re-ranking results computed from the **MBPP** benchmark using the **Meta Llama-3 8B Instruct** model.  
 Each instance includes:
 - `Prior` — model-estimated prior probabilities for each code candidate  
 - `Topic_RSA` — pragmatic topic-level posterior scores  
-- `accuracy` — measured functional correctness (0–100)
+- `accuracy` — functional correctness (0–100)
 
-Use the provided script to verify and recompute summary metrics:
-
+### Run the RSA-with-Tokens Validation
 ```bash
 python scripts/verify_rsa_with_tokens.py --file data/rsa_mbpp_llama3_8b.json
 ```
 
-Expected output (for reference):
+**Expected output:**
 ```json
 {"strict_accuracy": 0.5953, "mean_accuracy": 0.6462, "total": 257}
 ```
+
+- `strict_accuracy`: proportion of tasks where the top-ranked candidate achieved 100 % accuracy.  
+- `mean_accuracy`: average accuracy (in [0, 1]) of the top-ranked candidate.
+
+---
+
+## 🧠 Minimal Reproduction Interface
+
+The folder `src/codersa/` provides modular interfaces for:
+- `sampling.py` — candidate generation  
+- `rsa_core.py` — L0 / S1 / L1 pragmatic reasoning definitions  
+- `clustering.py` — paraphrase-equivalence clustering  
+- `reranking.py` — re-ranking pipeline integrating all components  
+
+These files contain interfaces and reference stubs; users can plug in their own implementations for full reproduction.
+
+---
+
+## 🧪 Testing
+
+A minimal integrity test is provided:
+
+```bash
+pytest -q
+```
+
+---
+
+## 🪪 Citation
+
+If you use this package or dataset, please cite:
+
+```bibtex
+@software{CodeRSA2025,
+  title        = {CodeRSA: Pragmatic Reasoning Improves LLM Code Generation},
+  author       = {Anonymous},
+  year         = {2025},
+  url          = {https://github.com/Hyperplane2021/CodeRSA}
+}
+```
+
+---
+
+## 📄 License
+
+This project is released under the **MIT License**.  
+See the [LICENSE](./LICENSE) file for details.
