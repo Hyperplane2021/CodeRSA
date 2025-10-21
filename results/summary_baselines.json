@@ -1,0 +1,10 @@
+{
+  "computed_from_repo": {
+    "CodeRSA": "auto"
+  },
+  "reported_baselines": {
+    "CodeRSA_without_clustering": 47.9,
+    "Coder": 53.3,
+    "CoderReviewer": 56.4
+  }
+}
