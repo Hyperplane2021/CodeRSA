@@ -1,7 +1,7 @@
 # CodeRSA: Reproducible Implementation and Verification Package
 
 This repository provides a fully self-contained reproducibility package for **CodeRSA**,  
-a reasoning-aware evaluation framework for analyzing and verifying code generation from large language models (LLMs).  
+a evaluation framework for analyzing and verifying code generation from large language models (LLMs).  
 It contains verified data, pipeline scripts, and baseline comparisons for anonymous academic review.
 
 ---
