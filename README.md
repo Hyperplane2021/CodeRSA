@@ -126,20 +126,6 @@ A minimal integrity test is provided:
 pytest -q
 ```
 
----
-
-## 🪪 Citation
-
-If you use this package or dataset, please cite:
-
-```bibtex
-@software{CodeRSA2025,
-  title        = {CodeRSA: Pragmatic Reasoning Improves LLM Code Generation},
-  author       = {Anonymous},
-  year         = {2025},
-  url          = {https://github.com/Hyperplane2021/CodeRSA}
-}
-```
 
 ---
 
