@@ -1,7 +1,7 @@
 
 # CodeRSA: Reproducible Implementation and Verification Package
 
-This repository provides a self-contained reproducibility package for **CodeRSA**, including end-to-end scripts to generate candidates, run unit tests, compute Coder–Reviewer scores, and evaluate RSA-with-tokens. All instructions are in English and suitable for double-blind review.
+This repository provides a self-contained reproducibility package for **CodeRSA**, including end-to-end scripts to generate candidates, run unit tests, compute Coder–Reviewer scores, and evaluate RSA-with-tokens. 
 
 ## Quick Start
 ```bash
