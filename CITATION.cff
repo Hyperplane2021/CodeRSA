@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: Pragmatic Reasoning improves LLM Code Generation
+message: "If you use this artifact, please cite the paper and this repository."
+type: software
+version: 0.1.0
+date-released: 2025-10-21
+authors:
+  - name: "TBD"
+repository-code: "https://github.com/TBD/codersa"
+license: MIT
