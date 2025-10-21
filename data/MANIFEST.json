@@ -1,0 +1,12 @@
+{
+  "spec_version": "1.0",
+  "generated_at": "2025-10-21T12:05:05Z",
+  "base_dir": "data",
+  "files": [
+    {
+      "path": "rsa_mbpp_llama3_8b.json",
+      "size": 7041496,
+      "sha256": "f3ef8ec0d459eaac61e185f365e6efbf7aa857a78cb37723ec936d695c8133c1"
+    }
+  ]
+}
